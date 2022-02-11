@@ -1,0 +1,93 @@
+{
+  "name": "Revocation Manager",
+  "authors": ["François Guérin <francois.guerin@gravity.earth>"],
+  "views": [
+    {
+      "implementations": [
+        {
+          "michelsonStorageView": {
+            "annotations": [],
+            "returnType": {
+              "prim": "key",
+              "args": [],
+              "annots": ["%owner"]
+            },
+            "code": [
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "CAR"
+              }
+            ],
+            "parameter": {
+              "prim": "unit"
+            }
+          }
+        }
+      ],
+      "name": "getOwner",
+      "pure": true
+    },
+    {
+      "implementations": [
+        {
+          "michelsonStorageView": {
+            "annotations": [],
+            "returnType": {
+              "prim": "key",
+              "args": [],
+              "annots": ["%list"]
+            },
+            "code": [
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "CAR"
+              }
+            ],
+            "parameter": {
+              "prim": "unit"
+            }
+          }
+        }
+      ],
+      "name": "getList",
+      "pure": true
+    },
+    {
+      "implementations": [
+        {
+          "michelsonStorageView": {
+            "annotations": [],
+            "returnType": {
+              "prim": "key",
+              "args": [],
+              "annots": ["%sig"]
+            },
+            "code": [
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "CDR"
+              },
+              {
+                "prim": "CDR"
+              }
+            ],
+            "parameter": {
+              "prim": "unit"
+            }
+          }
+        }
+      ],
+      "name": "getSig",
+      "pure": true
+    }
+  ]
+}

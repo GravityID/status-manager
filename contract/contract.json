@@ -1,0 +1,325 @@
+[
+  {
+    "prim": "parameter",
+    "args": [
+      {
+        "prim": "or",
+        "args": [
+          {
+            "prim": "nat",
+            "annots": [
+              "%on"
+            ]
+          },
+          {
+            "prim": "nat",
+            "annots": [
+              "%off"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "prim": "storage",
+    "args": [
+      {
+        "prim": "pair",
+        "args": [
+          {
+            "prim": "address",
+            "annots": [
+              "%owner"
+            ]
+          },
+          {
+            "prim": "nat",
+            "annots": [
+              "%list"
+            ]
+          },
+          {
+            "prim": "big_map",
+            "annots": [
+              "%metadata"
+            ],
+            "args": [
+              {
+                "prim": "string"
+              },
+              {
+                "prim": "bytes"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "prim": "code",
+    "args": [
+      [
+        {
+          "prim": "UNPAIR"
+        },
+        {
+          "prim": "SWAP"
+        },
+        {
+          "prim": "DUP"
+        },
+        {
+          "prim": "DUG",
+          "args": [
+            {
+              "int": "2"
+            }
+          ]
+        },
+        {
+          "prim": "UNPAIR",
+          "annots": [
+            "@owner"
+          ]
+        },
+        {
+          "prim": "SENDER"
+        },
+        {
+          "prim": "COMPARE"
+        },
+        {
+          "prim": "NEQ",
+          "annots": [
+            "@sender_different_owner"
+          ]
+        },
+        {
+          "prim": "IF",
+          "args": [
+            [
+              {
+                "prim": "PUSH",
+                "args": [
+                  {
+                    "prim": "string"
+                  },
+                  {
+                    "string": "Unauthorized sender"
+                  }
+                ]
+              },
+              {
+                "prim": "FAILWITH"
+              }
+            ],
+            []
+          ]
+        },
+        {
+          "prim": "PUSH",
+          "annots": [
+            "@mutez_zero"
+          ],
+          "args": [
+            {
+              "prim": "mutez"
+            },
+            {
+              "int": "0"
+            }
+          ]
+        },
+        {
+          "prim": "AMOUNT"
+        },
+        {
+          "prim": "COMPARE"
+        },
+        {
+          "prim": "GT",
+          "annots": [
+            "@amount_greater_zero"
+          ]
+        },
+        {
+          "prim": "IF",
+          "args": [
+            [
+              {
+                "prim": "PUSH",
+                "args": [
+                  {
+                    "prim": "string"
+                  },
+                  {
+                    "string": "XTZ not accepted"
+                  }
+                ]
+              },
+              {
+                "prim": "FAILWITH"
+              }
+            ],
+            []
+          ]
+        },
+        {
+          "prim": "SWAP"
+        },
+        {
+          "prim": "IF_LEFT",
+          "args": [
+            [
+              {
+                "prim": "DIP",
+                "args": [
+                  [
+                    {
+                      "prim": "UNPAIR",
+                      "args": [
+                        {
+                          "int": "2"
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              {
+                "prim": "PUSH",
+                "annots": [
+                  "@nat_one"
+                ],
+                "args": [
+                  {
+                    "prim": "nat"
+                  },
+                  {
+                    "int": "1"
+                  }
+                ]
+              },
+              {
+                "prim": "LSL",
+                "annots": [
+                  "@mask"
+                ]
+              },
+              {
+                "prim": "OR",
+                "annots": [
+                  "@new_list"
+                ]
+              }
+            ],
+            [
+              {
+                "prim": "DIP",
+                "args": [
+                  [
+                    {
+                      "prim": "UNPAIR",
+                      "args": [
+                        {
+                          "int": "2"
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              {
+                "prim": "PUSH",
+                "annots": [
+                  "@nat_one"
+                ],
+                "args": [
+                  {
+                    "prim": "nat"
+                  },
+                  {
+                    "int": "1"
+                  }
+                ]
+              },
+              {
+                "prim": "LSL"
+              },
+              {
+                "prim": "NOT",
+                "annots": [
+                  "@mask"
+                ]
+              },
+              {
+                "prim": "AND",
+                "annots": [
+                  "@new_list"
+                ]
+              }
+            ]
+          ]
+        },
+        {
+          "prim": "SWAP"
+        },
+        {
+          "prim": "DROP"
+        },
+        {
+          "prim": "DIP",
+          "args": [
+            [
+              {
+                "prim": "UNPAIR",
+                "args": [
+                  {
+                    "int": "3"
+                  }
+                ]
+              }
+            ]
+          ]
+        },
+        {
+          "prim": "SWAP"
+        },
+        {
+          "prim": "DIP",
+          "args": [
+            {
+              "int": "2"
+            },
+            [
+              {
+                "prim": "DROP"
+              }
+            ]
+          ]
+        },
+        {
+          "prim": "PAIR",
+          "args": [
+            {
+              "int": "3"
+            }
+          ]
+        },
+        {
+          "prim": "NIL",
+          "args": [
+            {
+              "prim": "operation"
+            }
+          ]
+        },
+        {
+          "prim": "PAIR"
+        }
+      ]
+    ]
+  }
+]

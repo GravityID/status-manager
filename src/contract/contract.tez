@@ -1,0 +1,18 @@
+parameter string;
+storage (pair (address %owner) (string %list) (big_map %metadata string bytes));
+code { UNPAIR;
+       SWAP;
+       UNPAIR;
+       DUP;
+       SENDER;
+       COMPARE;
+       NEQ; # sender == owner
+       IF { PUSH string "Unauthorized sender"; FAILWITH } {};
+       PUSH mutez 0;
+       AMOUNT;
+       COMPARE;
+       GT; # transfer amount > 0
+       IF { PUSH string "XTZ not accepted"; FAILWITH } {};
+       DIP { CDR; SWAP };
+       PAIR 3;
+       NIL operation; PAIR };

@@ -5,6 +5,11 @@ on:
   pull_request:
     branches: [master, dev]
 
+env:
+  SIGNER_ADDRESS: tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6
+  SIGNER_PRIVATE: ${{ secrets.SIGNER_PRIVATE }}
+  TEZOS_RPC: https://sandbox.hangzhounet.gravity.earth
+
 jobs:
   build:
     runs-on: ubuntu-latest

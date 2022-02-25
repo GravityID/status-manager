@@ -16,7 +16,7 @@ npm i
 
 ### Originate
 
-Deploy an instance of Revocation Manager with a initial revocation list filled with 0
+Deploy an instance of Revocation Manager with an initial revocation list
 
 ```typescript
 import { InMemorySigner } from "@taquito/signer";
@@ -31,7 +31,7 @@ await originate(signer, size);
 
 ### Revoke
 
-Revoke a Verifiable Credential associated with an on-chain Revocation Manager
+Revoke a Verifiable Credential associated with a Revocation Manager
 
 ```typescript
 import { InMemorySigner } from "@taquito/signer";
@@ -65,7 +65,7 @@ await revoke(vc, signer);
 
 ### Unrevoke
 
-Unrevoke a Verifiable Credential associated with an on-chain Revocation Manager
+Unrevoke a Verifiable Credential associated with an Revocation Manager
 
 ```typescript
 import { InMemorySigner } from "@taquito/signer";

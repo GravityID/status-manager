@@ -7,6 +7,7 @@ on:
 
 env:
   SIGNER_ADDRESS: tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6
+  SIGNER_PRIVATE: ${{ secrets.SIGNER_PRIVATE }}
   TEZOS_RPC: https://sandbox.hangzhounet.gravity.earth
 
 jobs:
@@ -16,6 +17,8 @@ jobs:
       matrix:
         node-version: [12.x, 14.x]
     steps:
+      - name: List env
+        run: env
       - name: Checkout repository
         uses: actions/checkout@v2
       - name: Use Node.js ${{ matrix.node-version }}
@@ -25,8 +28,4 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Test project
-        env:
-          SIGNER_PRIVATE: ${{ secrets.SIGNER_PRIVATE }}
-        run: |
-          echo $SIGNER_PRIVATE
-          npm run test
+        run: npm run test

@@ -73,8 +73,6 @@ describe("Revocation Manager", function () {
       const id = `rlist://${address}`;
       const vc = await resolve(id);
 
-      console.log(vc);
-
       expect(vc).to.be.an("object");
       expect(vc).to.have.keys(
         "@context",

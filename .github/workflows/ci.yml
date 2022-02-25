@@ -27,4 +27,6 @@ jobs:
       - name: Test project
         env:
           SIGNER_PRIVATE: ${{ secrets.SIGNER_PRIVATE }}
-        run: npm run test
+        run: |
+          echo $SIGNER_PRIVATE
+          npm run test

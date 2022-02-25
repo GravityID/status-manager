@@ -1,6 +1,6 @@
 # revocation-manager
 
-This library enables revocation of Verifiable Credentials in a decentralized manner using the Tezos Blockchain. It uses the [https://w3c-ccg.github.io/vc-status-rl-2020/](Revocation List 2020) specification as basic principle to manage revocation.
+This library enables revocation of Verifiable Credentials in a decentralized manner using the Tezos Blockchain. It uses the [Revocation List 2020](https://w3c-ccg.github.io/vc-status-rl-2020/) specification as basic principle to manage revocation.
 
 ## Installation
 

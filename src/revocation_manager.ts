@@ -71,7 +71,7 @@ export async function originate(
   const value = new Uint8Array(size);
   const bitstring = new Bitstring(value);
   const list = bitstring.toBase64();
-  const storage = { owner, metadata, list, size };
+  const storage = { owner, metadata, list };
 
   tezosToolkit.setSignerProvider(signer);
   const operation = await tezosToolkit.contract.originate({ code, storage });

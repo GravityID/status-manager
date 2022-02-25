@@ -103,7 +103,7 @@ Build a `RevocationList2020Credential` from a Revocation Manager
 
 ```typescript
 import { InMemorySigner } from "@taquito/signer";
-import { unrevoke } from "revocation-manager";
+import { resolve } from "revocation-manager";
 
 const id = "rlist://KT1U4xsumuCWY7UZRrr7hVGtqEi2MsuisUUB";
 const vc = await resolve(id);

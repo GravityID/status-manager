@@ -11,7 +11,6 @@ const {
   OriginationOperation,
   TransactionOperation,
 } = require("@taquito/taquito");
-const { Parser } = require("@taquito/michel-codec");
 const getStdin = require("get-stdin");
 
 program.version(pjson.version);
@@ -46,6 +45,7 @@ Status: ${op.status}`);
 
 program
   .command("originate")
+  .description("deploy an instance of Revocation Manager with an initial revocation list")
   .addOption(privateKeyFileOption)
   .addOption(rpcOption)
   .action(
@@ -77,6 +77,7 @@ program
 
 program
   .command("resolve")
+  .description("build a RevocationList2020Credential from a Revocation Manager")
   .addOption(rpcOption)
   .addArgument(vcIdArgument)
   .action(async (id) => {
@@ -89,9 +90,9 @@ program
     }
   });
 
-
 program
   .command("is-revoked")
+  .description("check whether a Verifiable Credential is revoked or not")
   .addOption(rpcOption)
   .action(async () => {
     try {
@@ -108,6 +109,7 @@ program
 
 program
   .command("revoke")
+  .description("revoke a Verifiable Credential associated with a Revocation Manager")
   .addOption(privateKeyFileOption)
   .addOption(rpcOption)
   .action(
@@ -140,6 +142,7 @@ program
 
 program
   .command("unrevoke")
+  .description("unrevoke a Verifiable Credential associated with an Revocation Manager")
   .addOption(privateKeyFileOption)
   .addOption(rpcOption)
   .action(
@@ -169,16 +172,5 @@ program
       }
     }
   );
-
-program
-  .command("parse-json")
-  .action(() => {
-    const path = `${__dirname}/../src/contract/contract.tez`;
-    const script = fs.readFileSync(path).toString();
-    const p = new Parser();
-    const code = p.parseScript(script);
-
-    console.log(JSON.stringify(code, null, 2));
-  });
 
 program.parse(process.argv);

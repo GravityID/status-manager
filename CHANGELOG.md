@@ -6,8 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.0.0 - 2022-02-28]
+
 ### Added
 
 - Files
+	- `bin/`
+	- `src/`
+	- `test/`
+	- `README.md`
 	- `CHANGELOG.md`
-	- `contract/`
+
+- Features
+	- Methods:
+		- `originate`: deploy an instance of Revocation Manager with an initial revocation list
+		- `resolve`: build a RevocationList2020Credential from a Revocation Manager
+		- `is-revoked`: check whether a Verifiable Credential is revoked or not
+		- `revoke`: revoke a Verifiable Credential associated with a Revocation Manager
+		- `unrevoke`: unrevoke a Verifiable Credential associated with a Revocation Manager
+	- CLI

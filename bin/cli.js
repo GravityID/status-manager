@@ -6,7 +6,7 @@ const pjson = require("../package.json");
 const program = new Command(pjson.name);
 const fs = require("fs");
 const { InMemorySigner } = require("@taquito/signer");
-const { originate, isRevoked, revoke, unrevoke, resolve } = require("../lib/revocation_manager");
+const { originate, isRevoked, revoke, unrevoke, resolve } = require("../lib/index");
 const {
   OriginationOperation,
   TransactionOperation,

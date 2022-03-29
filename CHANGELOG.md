@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+## [1.1.0 - 2022-03-29]
+
+### Changed
+
+- Files
+	- `src/revocation_manager.ts` -> `src/index.ts`
+
+
 ## [1.0.0 - 2022-02-28]
 
 ### Added

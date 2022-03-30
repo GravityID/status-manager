@@ -26,4 +26,4 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Test project
-        run: npm run test
+        run: SIGNER_ADDRESS=$SIGNER_ADDRESS SIGNER_PRIVATE=$SIGNER_PRIVATE TEZOS_RPC=$TEZOS_RPC npm run test

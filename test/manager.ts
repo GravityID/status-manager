@@ -24,8 +24,6 @@ chai.use(require("chai-string"));
 chai.use(require("chai-as-promised"));
 chai.use(require("chai-arrays"));
 
-console.log("ENV", process.env);
-
 const rpc =
   process.env.TEZOS_RPC || process.env.VUE_APP_TEZOS_RPC || "localhost:8080";
 

@@ -5,18 +5,20 @@ import {
   TezosToolkit,
   TransactionOperation,
 } from "@taquito/taquito";
+import { Estimate } from "@taquito/taquito/dist/types/contract/estimate";
 import { Tzip16Module } from "@taquito/tzip16";
 import { Prefix } from "@taquito/utils";
 import chai, { expect } from "chai";
 import "dotenv/config";
 import faker from "faker";
-import { RevocationManagerStorage } from "../src/interfaces";
 import {
+  estimateOriginate,
   originate,
   resolve,
   revoke,
   unrevoke,
-} from "../src/revocation_manager";
+} from "../src/index";
+import { RevocationManagerStorage } from "../src/interfaces";
 
 chai.use(require("chai-string"));
 chai.use(require("chai-as-promised"));
@@ -65,6 +67,17 @@ describe("Revocation Manager", function () {
         .to.be.a("string")
         .and.to.equal(await signer.publicKeyHash());
       expect(storage.list).to.be.a("string");
+    });
+  });
+
+  describe("estimateOriginate", function () {
+    it("should successfully estimate a contract origination", async function () {
+      const estimate = await estimateOriginate(signer, size);
+      expect(estimate)
+        .to.be.an("object")
+        .and.to.satisfy((estimate: Estimate): boolean => {
+          return estimate.totalCost > 0;
+        });
     });
   });
 

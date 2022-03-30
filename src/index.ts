@@ -5,6 +5,7 @@ import {
   TezosToolkit,
   TransactionOperation,
 } from "@taquito/taquito";
+import { Estimate } from "@taquito/taquito/dist/types/contract/estimate";
 import { char2Bytes, tzip16, Tzip16Module } from "@taquito/tzip16";
 import { validateContractAddress, ValidationResult } from "@taquito/utils";
 import { expect } from "chai";
@@ -59,6 +60,23 @@ export async function resolve(id: string): Promise<any> {
   };
 
   return res;
+}
+
+export async function estimateOriginate(
+  signer: Signer,
+  size: number = MIN_LENGTH
+): Promise<Estimate> {
+  expect(size).to.be.a("number").and.to.be.greaterThanOrEqual(MIN_LENGTH);
+
+  const owner = await signer.publicKeyHash();
+  const value = new Uint8Array(size);
+  const bitstring = new Bitstring(value);
+  const list = bitstring.toBase64();
+  const storage = { owner, metadata, list };
+
+  tezosToolkit.setSignerProvider(signer);
+
+  return tezosToolkit.estimate.originate({ code, storage });
 }
 
 export async function originate(

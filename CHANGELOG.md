@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+- Features
+	- CLI
+		- `estimate-originate` command
+
+## [1.2.0 - 2022-02-30]
+
+### Added
+
+- Features
+	- Methods
+		- `estimateOriginate`: estimate the deployment of an instance of Revocation Manager with an initial revocation list
+
 ## [1.1.0 - 2022-03-29]
 
 ### Changed

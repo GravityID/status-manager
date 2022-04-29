@@ -1,11 +1,11 @@
 import {
+  Estimate,
   MichelsonMap,
   OriginationOperation,
   Signer,
   TezosToolkit,
   TransactionOperation,
 } from "@taquito/taquito";
-import { Estimate } from "@taquito/taquito/dist/types/contract/estimate";
 import { char2Bytes, tzip16, Tzip16Module } from "@taquito/tzip16";
 import { validateContractAddress, ValidationResult } from "@taquito/utils";
 import { expect } from "chai";

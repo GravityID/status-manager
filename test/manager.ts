@@ -1,23 +1,17 @@
 import { InMemorySigner } from "@taquito/signer";
 import {
+  Estimate,
   OriginationOperation,
   Signer,
   TezosToolkit,
   TransactionOperation,
 } from "@taquito/taquito";
-import { Estimate } from "@taquito/taquito/dist/types/contract/estimate";
 import { Tzip16Module } from "@taquito/tzip16";
 import { Prefix } from "@taquito/utils";
 import chai, { expect } from "chai";
 import "dotenv/config";
 import faker from "faker";
-import {
-  estimateOriginate,
-  originate,
-  resolve,
-  revoke,
-  unrevoke,
-} from "../src/index";
+import { estimateOriginate, originate, resolve, revoke } from "../src/index";
 import { RevocationManagerStorage } from "../src/interfaces";
 
 chai.use(require("chai-string"));
@@ -62,7 +56,7 @@ describe("Revocation Manager", function () {
       const storage = await instance.storage<RevocationManagerStorage>();
       expect(storage)
         .to.be.an("object")
-        .and.to.have.keys("owner", "metadata", "list");
+        .and.to.have.keys("list", "metadata", "owner");
       expect(storage.owner)
         .to.be.a("string")
         .and.to.equal(await signer.publicKeyHash());
@@ -125,7 +119,7 @@ describe("Revocation Manager", function () {
 
   describe("revoke", function () {
     it("should successfully revoke a credential", async function () {
-      const vc = {
+      const vc1 = {
         "@context": "https://www.w3.org/2018/credentials/v1",
         id: faker.internet.url(),
         credentialStatus: {
@@ -135,14 +129,7 @@ describe("Revocation Manager", function () {
           revocationListCredential: `rlist://${address}`,
         },
       };
-      const op = await revoke(vc, signer);
-      expect(op).to.be.instanceOf(TransactionOperation);
-    });
-  });
-
-  describe("unrevoke", function () {
-    it("should successfully unrevoke a credential", async function () {
-      const vc = {
+      const vc2 = {
         "@context": "https://www.w3.org/2018/credentials/v1",
         id: faker.internet.url(),
         credentialStatus: {
@@ -152,7 +139,7 @@ describe("Revocation Manager", function () {
           revocationListCredential: `rlist://${address}`,
         },
       };
-      const op = await unrevoke(vc, signer);
+      const op = await revoke([vc1, vc2], signer);
       expect(op).to.be.instanceOf(TransactionOperation);
     });
   });

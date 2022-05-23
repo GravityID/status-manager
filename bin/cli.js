@@ -127,7 +127,7 @@ program
           .trim();
         const signer = await InMemorySigner.fromSecretKey(privateKey);
 	const vc = JSON.parse(await getStdin());
-        const op = await revoke(vc, signer);
+        const op = await revoke([vc], signer);
 
         debugOperation(op);
 

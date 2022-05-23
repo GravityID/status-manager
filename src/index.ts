@@ -160,40 +160,28 @@ function validateVC(vc: any): { address: string; index: number } {
 }
 
 export async function revoke(
-  vc: any,
+  vcs: Array<any>,
   signer: Signer
 ): Promise<TransactionOperation> {
+  expect(vcs).to.be.instanceOf(Array).and.to.not.be.empty;
+
   tezosToolkit.setSignerProvider(signer);
 
-  const { address, index } = validateVC(vc);
+  const arr = vcs.map((vc) => validateVC(vc));
+  const { address } = arr[0];
+  const test = arr.every((o) => o.address === address);
+
+  if (!test) throw new Error("Revocation lists must be the same");
+
   const instance = await tezosToolkit.contract.at(address, tzip16);
-  const rlvc = await resolve(vc.credentialStatus.revocationListCredential);
+  const rlvc = await resolve(vcs[0].credentialStatus.revocationListCredential);
   const {
     credentialSubject: { encodedList },
   } = rlvc;
   const bitstring = Bitstring.fromBase64(encodedList);
-  bitstring.turnOn(index);
-  const list = bitstring.toBase64();
-  const operation = await instance.methods.default(list).send();
-  await operation.confirmation(3);
 
-  return operation;
-}
+  for (const o of arr) bitstring.turnOn(o.index);
 
-export async function unrevoke(
-  vc: any,
-  signer: Signer
-): Promise<TransactionOperation> {
-  tezosToolkit.setSignerProvider(signer);
-
-  const { address, index } = validateVC(vc);
-  const instance = await tezosToolkit.contract.at(address, tzip16);
-  const rlvc = await resolve(vc.credentialStatus.revocationListCredential);
-  const {
-    credentialSubject: { encodedList },
-  } = rlvc;
-  const bitstring = Bitstring.fromBase64(encodedList);
-  bitstring.turnOff(index);
   const list = bitstring.toBase64();
   const operation = await instance.methods.default(list).send();
   await operation.confirmation(3);

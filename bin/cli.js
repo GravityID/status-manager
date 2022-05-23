@@ -6,7 +6,7 @@ const pjson = require("../package.json");
 const program = new Command(pjson.name);
 const fs = require("fs");
 const { InMemorySigner } = require("@taquito/signer");
-const { originate, isRevoked, revoke, unrevoke, resolve } = require("../lib/index");
+const { originate, isRevoked, revoke, resolve } = require("../lib/index");
 const {
   OriginationOperation,
   TransactionOperation,
@@ -128,39 +128,6 @@ program
         const signer = await InMemorySigner.fromSecretKey(privateKey);
 	const vc = JSON.parse(await getStdin());
         const op = await revoke(vc, signer);
-
-        debugOperation(op);
-
-	console.debug(`Credential id: ${vc.id}`);
-	console.debug(`Revocation manager id: ${vc.credentialStatus.revocationListCredential}`);
-	console.debug(`Index: ${vc.credentialStatus.revocationListIndex}`);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-  );
-
-program
-  .command("unrevoke")
-  .description("unrevoke a Verifiable Credential associated with an Revocation Manager")
-  .addOption(privateKeyFileOption)
-  .addOption(rpcOption)
-  .action(
-    /**
-     * @param {object} options
-     * @param {string} options.privateKeyFile
-     */
-    async (options) => {
-      const { privateKeyFile } = options;
-
-      try {
-        const privateKey = fs
-          .readFileSync(privateKeyFile)
-          .toString("utf-8")
-          .trim();
-        const signer = await InMemorySigner.fromSecretKey(privateKey);
-	const vc = JSON.parse(await getStdin());
-        const op = await unrevoke(vc, signer);
 
         debugOperation(op);
 

@@ -8,7 +8,7 @@ on:
 env:
   SIGNER_ADDRESS: tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6
   SIGNER_PRIVATE: ${{ secrets.SIGNER_PRIVATE }}
-  TEZOS_RPC: https://sandbox.hangzhounet.gravity.earth
+  TEZOS_RPC: https://ithacanet.smartpy.io
 
 jobs:
   build:

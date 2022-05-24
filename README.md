@@ -69,40 +69,6 @@ const vc = {
 await revoke(vc, signer);
 ```
 
-#### Unrevoke
-
-Unrevoke a Verifiable Credential associated with an Revocation Manager It changes the storage of the on-chain Revocation Manager.
-
-```typescript
-import { InMemorySigner } from "@taquito/signer";
-import { unrevoke } from "revocation-manager";
-
-const key = "edsk...";
-const signer = await InMemorySigner.fromSecretKey(key);
-const vc = {
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-    "https://w3id.org/vc-revocation-list-2020/v1"
-  ],
-  "id": "https://example.com/credentials/23894672394",
-  "type": ["VerifiableCredential"],
-  "issuer": "did:example:12345",
-  "issued": "2020-04-05T14:27:42Z",
-  "credentialStatus": {
-    "id": "https://dmv.example.gov/credentials/status/3#94567",
-    "type": "RevocationList2020Status",
-    "revocationListIndex": "94567",
-    "revocationListCredential": "rlist://KT1U4xsumuCWY7UZRrr7hVGtqEi2MsuisUUB"
-  },
-  "credentialSubject": {
-    "id": "did:example:6789",
-    "type": "Person"
-  }
-}
-
-await unrevoke(vc, signer);
-```
-
 #### Resolve
 
 Build a `RevocationList2020Credential` from a Revocation Manager. The result can be cached and accessed while being offline.

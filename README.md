@@ -66,7 +66,7 @@ const vc = {
   }
 }
 
-await revoke(vc, signer);
+await revoke([vc], signer);
 ```
 
 #### Resolve

@@ -12,8 +12,6 @@ import { expect } from "chai";
 import { Bitstring } from "./bitstring";
 import code from "./contract/contract.json";
 
-const URL_REGEX =
-  /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/;
 const MIN_LENGTH = 16384;
 
 const rpc =
@@ -124,7 +122,9 @@ function validateVC(vc: any): { address: string; index: number } {
     revocationListCredential: string;
   } = credentialStatus;
 
-  expect(id).to.be.a("string").and.to.match(URL_REGEX);
+  expect(id)
+    .to.be.a("string")
+    .and.to.equals(`${revocationListCredential}#${revocationListIndex}`);
   expect(type).to.be.a("string").and.to.equal("RevocationList2020Status");
   expect(revocationListIndex)
     .to.be.a("string")

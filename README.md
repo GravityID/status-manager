@@ -153,6 +153,5 @@ Commands:
   resolve [options] <manager>  build a RevocationList2020Credential from a Revocation Manager
   is-revoked [options]         check whether a Verifiable Credential is revoked or not
   revoke [options]             revoke a Verifiable Credential associated with a Revocation Manager
-  unrevoke [options]           unrevoke a Verifiable Credential associated with an Revocation Manager
   help [command]               display help for command
 ```

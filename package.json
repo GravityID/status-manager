@@ -1,6 +1,6 @@
 {
-  "name": "revocation-manager",
-  "version": "2.0.0",
+  "name": "status-manager",
+  "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
   "files": [

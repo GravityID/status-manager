@@ -15,15 +15,27 @@
         "args": [
           {
             "prim": "address",
-            "annots": ["%owner"]
+            "annots": [
+              "%owner"
+            ]
           },
           {
             "prim": "string",
-            "annots": ["%list"]
+            "annots": [
+              "%list"
+            ]
+          },
+          {
+            "prim": "string",
+            "annots": [
+              "%purpose"
+            ]
           },
           {
             "prim": "big_map",
-            "annots": ["%metadata"],
+            "annots": [
+              "%metadata"
+            ],
             "args": [
               {
                 "prim": "string"

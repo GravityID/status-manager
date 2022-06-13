@@ -1,12 +1,12 @@
 parameter string;
-storage (pair (address %owner) (string %list) (big_map %metadata string bytes));
+storage (pair (address %owner) (string %list) (string %purpose) (big_map %metadata string bytes));
 code { UNPAIR;
        SWAP;
        UNPAIR;
        DUP;
        SENDER;
        COMPARE;
-       NEQ; # sender == owner
+       NEQ; # sender != owner
        IF { PUSH string "Unauthorized sender"; FAILWITH } {};
        PUSH mutez 0;
        AMOUNT;

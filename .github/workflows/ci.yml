@@ -7,7 +7,7 @@ on:
 
 env:
   SIGNER_ADDRESS: tz1aSkwEot3L2kmUvcoxzjMomb9mvBNuzFK6
-  SIGNER_PRIVATE: ${{ secrets.SIGNER_PRIVATE }}
+  SIGNER_PRIVATE: edsk3RFfvaFaxbHx8BMtEW1rKQcPtDML3LXjNqMNLCzC3wLC1bWbAt
   TEZOS_RPC: https://ithacanet.smartpy.io
 
 jobs:

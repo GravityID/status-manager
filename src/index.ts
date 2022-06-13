@@ -23,9 +23,7 @@ tezosToolkit.addExtension(new Tzip16Module());
 const metadata = new MichelsonMap();
 metadata.set(
   "",
-  char2Bytes(
-    "https://static.gravity.earth/json/revocation-manager-metadata.json"
-  )
+  char2Bytes("https://static.gravity.earth/json/status-manager-metadata.json")
 );
 
 /**
@@ -35,25 +33,27 @@ metadata.set(
 export async function resolve(id: string): Promise<any> {
   const [scheme, address] = id.split("://");
 
-  if (scheme !== "rlist") throw new Error("URI scheme should be 'rlist'");
+  if (scheme !== "slist") throw new Error("URI scheme should be 'slist'");
 
   const instance = await tezosToolkit.contract.at(address, tzip16);
   const views = await instance.tzip16().metadataViews();
-  const { getOwner, getList } = views;
+  const { getOwner, getPurpose, getList } = views;
   const owner: string = await getOwner().executeView();
+  const purpose: string = await getPurpose().executeView();
   const list: string = await getList().executeView();
   const res: any = {};
 
   res["@context"] = [
     "https://www.w3.org/2018/credentials/v1",
-    "https://w3id.org/vc-revocation-list-2020/v1",
+    "https://w3id.org/vc/status-list/2021/v1",
   ];
   res.id = id;
-  res.type = ["VerifiableCredential", "RevocationList2020Credential"];
+  res.type = ["VerifiableCredential", "StatusList2021Credential"];
   res.issuer = `did:pkh:tz:${owner}`;
   res.credentialSubject = {
     id: `${id}#list`,
-    type: "RevocationList2020",
+    type: "StatusList2021",
+    statusPurpose: purpose,
     encodedList: list,
   };
 
@@ -62,6 +62,7 @@ export async function resolve(id: string): Promise<any> {
 
 export async function estimateOriginate(
   signer: Signer,
+  purpose: "revocation" | "suspension",
   size: number = MIN_LENGTH
 ): Promise<Estimate> {
   expect(size).to.be.a("number").and.to.be.greaterThanOrEqual(MIN_LENGTH);
@@ -70,7 +71,7 @@ export async function estimateOriginate(
   const value = new Uint8Array(size);
   const bitstring = new Bitstring(value);
   const list = bitstring.toBase64();
-  const storage = { owner, metadata, list };
+  const storage = { owner, metadata, list, purpose };
 
   tezosToolkit.setSignerProvider(signer);
 
@@ -79,6 +80,7 @@ export async function estimateOriginate(
 
 export async function originate(
   signer: Signer,
+  purpose: "revocation" | "suspension",
   size: number = MIN_LENGTH
 ): Promise<OriginationOperation> {
   expect(size).to.be.a("number").and.to.be.greaterThanOrEqual(MIN_LENGTH);
@@ -87,7 +89,7 @@ export async function originate(
   const value = new Uint8Array(size);
   const bitstring = new Bitstring(value);
   const list = bitstring.toBase64();
-  const storage = { owner, metadata, list };
+  const storage = { owner, metadata, list, purpose };
 
   tezosToolkit.setSignerProvider(signer);
   const operation = await tezosToolkit.contract.originate({ code, storage });
@@ -98,7 +100,11 @@ export async function originate(
   return operation;
 }
 
-function validateVC(vc: any): { address: string; index: number } {
+function validateVC(vc: any): {
+  address: string;
+  index: number;
+  purpose: string;
+} {
   expect(vc).to.be.an("object").and.to.have.property("credentialStatus");
   const { credentialStatus } = vc;
 
@@ -107,26 +113,36 @@ function validateVC(vc: any): { address: string; index: number } {
     .and.to.have.keys(
       "id",
       "type",
-      "revocationListIndex",
-      "revocationListCredential"
+      "statusPurpose",
+      "statusListIndex",
+      "statusListCredential"
     );
   const {
     id,
     type,
-    revocationListIndex,
-    revocationListCredential,
+    statusPurpose,
+    statusListIndex,
+    statusListCredential,
   }: {
     id: string;
     type: string;
-    revocationListIndex: string;
-    revocationListCredential: string;
+    statusPurpose: string;
+    statusListIndex: string;
+    statusListCredential: string;
   } = credentialStatus;
 
   expect(id)
     .to.be.a("string")
-    .and.to.equals(`${revocationListCredential}#${revocationListIndex}`);
-  expect(type).to.be.a("string").and.to.equal("RevocationList2020Status");
-  expect(revocationListIndex)
+    .and.to.equals(`${statusListCredential}#${statusListIndex}`);
+  expect(type).to.be.a("string").and.to.equal("StatusList2021Entry");
+  expect(statusPurpose)
+    .to.be.a("string")
+    .and.to.satisfy((str: string): boolean => {
+      const purposes = ["revocation", "suspension"];
+
+      return purposes.includes(str);
+    });
+  expect(statusListIndex)
     .to.be.a("string")
     .and.to.satisfy((str: string): boolean => {
       function filterInt(value: string): number {
@@ -143,25 +159,26 @@ function validateVC(vc: any): { address: string; index: number } {
 
       return n >= 0;
     });
-  expect(revocationListCredential)
+  expect(statusListCredential)
     .to.be.a("string")
     .and.to.satisfy((str: string): boolean => {
-      if (!str.startsWith("rlist://")) return false;
+      if (!str.startsWith("slist://")) return false;
 
       const address = str.substring(8);
 
       return validateContractAddress(address) === ValidationResult.VALID;
     });
 
-  const index = parseInt(revocationListIndex);
-  const address = revocationListCredential.substring(8);
+  const index = parseInt(statusListIndex);
+  const address = statusListCredential.substring(8);
+  const purpose = statusPurpose;
 
-  return { address, index };
+  return { address, index, purpose };
 }
 
 export async function revoke(
-  vcs: Array<any>,
-  signer: Signer
+  signer: Signer,
+  vcs: Array<any>
 ): Promise<TransactionOperation> {
   expect(vcs).to.be.instanceOf(Array).and.to.not.be.empty;
 
@@ -171,13 +188,16 @@ export async function revoke(
   const { address } = arr[0];
   const test = arr.every((o) => o.address === address);
 
-  if (!test) throw new Error("Revocation lists must be the same");
+  if (!test) throw new Error("Status lists must be the same");
 
   const instance = await tezosToolkit.contract.at(address, tzip16);
-  const rlvc = await resolve(vcs[0].credentialStatus.revocationListCredential);
+  const rlvc = await resolve(vcs[0].credentialStatus.statusListCredential);
   const {
-    credentialSubject: { encodedList },
+    credentialSubject: { encodedList, statusPurpose },
   } = rlvc;
+
+  expect(statusPurpose).to.be.a("string").and.to.equal("revocation");
+
   const bitstring = Bitstring.fromBase64(encodedList);
 
   for (const o of arr) bitstring.turnOn(o.index);
@@ -189,12 +209,103 @@ export async function revoke(
   return operation;
 }
 
-export async function isRevoked(vc: any): Promise<boolean> {
-  const { index } = validateVC(vc);
-  const rlvc = await resolve(vc.credentialStatus.revocationListCredential);
+export async function suspend(
+  signer: Signer,
+  vcs: Array<any>
+): Promise<TransactionOperation> {
+  expect(vcs).to.be.instanceOf(Array).and.to.not.be.empty;
+
+  tezosToolkit.setSignerProvider(signer);
+
+  const arr = vcs.map((vc) => validateVC(vc));
+  const { address } = arr[0];
+  const test = arr.every((o) => o.address === address);
+
+  if (!test) throw new Error("Status lists must be the same");
+
+  const instance = await tezosToolkit.contract.at(address, tzip16);
+  const rlvc = await resolve(vcs[0].credentialStatus.statusListCredential);
   const {
-    credentialSubject: { encodedList },
+    credentialSubject: { encodedList, statusPurpose },
   } = rlvc;
+
+  expect(statusPurpose).to.be.a("string").and.to.equal("suspension");
+
+  const bitstring = Bitstring.fromBase64(encodedList);
+
+  for (const o of arr) bitstring.turnOn(o.index);
+
+  const list = bitstring.toBase64();
+  const operation = await instance.methods.default(list).send();
+  await operation.confirmation(3);
+
+  return operation;
+}
+
+export async function unsuspend(
+  signer: Signer,
+  vcs: Array<any>
+): Promise<TransactionOperation> {
+  expect(vcs).to.be.instanceOf(Array).and.to.not.be.empty;
+
+  tezosToolkit.setSignerProvider(signer);
+
+  const arr = vcs.map((vc) => validateVC(vc));
+  const { address } = arr[0];
+  const test = arr.every((o) => o.address === address);
+
+  if (!test) throw new Error("Status lists must be the same");
+
+  const instance = await tezosToolkit.contract.at(address, tzip16);
+  const rlvc = await resolve(vcs[0].credentialStatus.statusListCredential);
+  const {
+    credentialSubject: { encodedList, statusPurpose },
+  } = rlvc;
+
+  expect(statusPurpose).to.be.a("string").and.to.equal("suspension");
+
+  const bitstring = Bitstring.fromBase64(encodedList);
+
+  for (const o of arr) bitstring.turnOff(o.index);
+
+  const list = bitstring.toBase64();
+  const operation = await instance.methods.default(list).send();
+  await operation.confirmation(3);
+
+  return operation;
+}
+
+export async function isRevoked(vc: any): Promise<boolean> {
+  const { index, purpose } = validateVC(vc);
+
+  const rlvc = await resolve(vc.credentialStatus.statusListCredential);
+  const {
+    credentialSubject: { encodedList, statusPurpose },
+  } = rlvc;
+
+  expect(purpose)
+    .to.be.a("string")
+    .and.to.equal(statusPurpose)
+    .and.to.equal("revocation");
+
+  const bitstring = Bitstring.fromBase64(encodedList);
+
+  return bitstring.getPosition(index);
+}
+
+export async function isSuspended(vc: any): Promise<boolean> {
+  const { index, purpose } = validateVC(vc);
+
+  const rlvc = await resolve(vc.credentialStatus.statusListCredential);
+  const {
+    credentialSubject: { encodedList, statusPurpose },
+  } = rlvc;
+
+  expect(purpose)
+    .to.be.a("string")
+    .and.to.equal(statusPurpose)
+    .and.to.equal("suspension");
+
   const bitstring = Bitstring.fromBase64(encodedList);
 
   return bitstring.getPosition(index);

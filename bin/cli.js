@@ -6,7 +6,15 @@ const pjson = require("../package.json");
 const program = new Command(pjson.name);
 const fs = require("fs");
 const { InMemorySigner } = require("@taquito/signer");
-const { originate, isRevoked, revoke, resolve } = require("../lib/index");
+const {
+  originate,
+  isRevoked,
+  isSuspended,
+  revoke,
+  suspend,
+  unsuspend,
+  resolve,
+} = require("../lib/index");
 const {
   OriginationOperation,
   TransactionOperation,
@@ -25,9 +33,14 @@ const rpcOption = new Option(
   "rpc url to use to interact with the Tezos network"
 ).env("TEZOS_RPC");
 
+const typeOption = new Option(
+  "--type <type>",
+  "type of the status list"
+).choices(["revocation", "suspension"]);
+
 const vcIdArgument = new Argument(
   "<manager>",
-  "id of the revocation list credential"
+  "id of the status list credential"
 );
 
 /**
@@ -45,16 +58,20 @@ Status: ${op.status}`);
 
 program
   .command("originate")
-  .description("deploy an instance of Revocation Manager with an initial revocation list")
+  .description(
+    "deploy an instance of Status Manager with an initial status list"
+  )
   .addOption(privateKeyFileOption)
   .addOption(rpcOption)
+  .addOption(typeOption)
   .action(
     /**
      * @param {object} options
      * @param {string} options.privateKeyFile
+     * @param {string} options.type
      */
     async (options) => {
-      const { privateKeyFile } = options;
+      const { privateKeyFile, type } = options;
 
       try {
         const privateKey = fs
@@ -62,12 +79,12 @@ program
           .toString("utf-8")
           .trim();
         const signer = await InMemorySigner.fromSecretKey(privateKey);
-        const op = await originate(signer);
+        const op = await originate(signer, type);
 
         debugOperation(op);
 
-        console.debug("\nRevocation manager deployed");
-        console.debug(`Id: rlist://${op.contractAddress}`);
+        console.debug("\nStatus Manager deployed");
+        console.debug(`Id: slist://${op.contractAddress}`);
         console.debug(`Issuer: did:phk:tz:${await signer.publicKeyHash()}`);
       } catch (err) {
         console.error(err);
@@ -77,7 +94,7 @@ program
 
 program
   .command("resolve")
-  .description("build a RevocationList2020Credential from a Revocation Manager")
+  .description("build a StatusList2021Credential from a Status Manager")
   .addOption(rpcOption)
   .addArgument(vcIdArgument)
   .action(async (id) => {
@@ -100,8 +117,33 @@ program
       const revoked = await isRevoked(vc);
 
       console.debug(`Credential id: ${vc.id}`);
-      console.debug(`Revocation manager id: ${vc.credentialStatus.revocationListCredential}`);
-      console.debug(`Index: ${vc.credentialStatus.revocationListIndex} Value: ${revoked}`);
+      console.debug(
+        `Status Manager id: ${vc.credentialStatus.statusListCredential}`
+      );
+      console.debug(
+        `Index: ${vc.credentialStatus.statusListIndex} Value: ${revoked}`
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  });
+
+program
+  .command("is-suspended")
+  .description("check whether a Verifiable Credential is suspended or not")
+  .addOption(rpcOption)
+  .action(async () => {
+    try {
+      const vc = JSON.parse(await getStdin());
+      const suspended = await isSuspended(vc);
+
+      console.debug(`Credential id: ${vc.id}`);
+      console.debug(
+        `Status Manager id: ${vc.credentialStatus.statusListCredential}`
+      );
+      console.debug(
+        `Index: ${vc.credentialStatus.statusListIndex} Value: ${suspended}`
+      );
     } catch (err) {
       console.error(err);
     }
@@ -109,7 +151,9 @@ program
 
 program
   .command("revoke")
-  .description("revoke a Verifiable Credential associated with a Revocation Manager")
+  .description(
+    "revoke a Verifiable Credential associated with a Status Manager"
+  )
   .addOption(privateKeyFileOption)
   .addOption(rpcOption)
   .action(
@@ -126,14 +170,90 @@ program
           .toString("utf-8")
           .trim();
         const signer = await InMemorySigner.fromSecretKey(privateKey);
-	const vc = JSON.parse(await getStdin());
-        const op = await revoke([vc], signer);
+        const vc = JSON.parse(await getStdin());
+        const op = await revoke(signer, [vc]);
 
         debugOperation(op);
 
-	console.debug(`Credential id: ${vc.id}`);
-	console.debug(`Revocation manager id: ${vc.credentialStatus.revocationListCredential}`);
-	console.debug(`Index: ${vc.credentialStatus.revocationListIndex}`);
+        console.debug(`Credential id: ${vc.id}`);
+        console.debug(
+          `Status Manager id: ${vc.credentialStatus.statusListCredential}`
+        );
+        console.debug(`Index: ${vc.credentialStatus.statusListIndex}`);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  );
+
+program
+  .command("suspend")
+  .description(
+    "suspend a Verifiable Credential associated with a Status Manager"
+  )
+  .addOption(privateKeyFileOption)
+  .addOption(rpcOption)
+  .action(
+    /**
+     * @param {object} options
+     * @param {string} options.privateKeyFile
+     */
+    async (options) => {
+      const { privateKeyFile } = options;
+
+      try {
+        const privateKey = fs
+          .readFileSync(privateKeyFile)
+          .toString("utf-8")
+          .trim();
+        const signer = await InMemorySigner.fromSecretKey(privateKey);
+        const vc = JSON.parse(await getStdin());
+        const op = await suspend(signer, [vc]);
+
+        debugOperation(op);
+
+        console.debug(`Credential id: ${vc.id}`);
+        console.debug(
+          `Status Manager id: ${vc.credentialStatus.statusListCredential}`
+        );
+        console.debug(`Index: ${vc.credentialStatus.statusListIndex}`);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  );
+
+program
+  .command("unsuspend")
+  .description(
+    "unsuspend a Verifiable Credential associated with a Status Manager"
+  )
+  .addOption(privateKeyFileOption)
+  .addOption(rpcOption)
+  .action(
+    /**
+     * @param {object} options
+     * @param {string} options.privateKeyFile
+     */
+    async (options) => {
+      const { privateKeyFile } = options;
+
+      try {
+        const privateKey = fs
+          .readFileSync(privateKeyFile)
+          .toString("utf-8")
+          .trim();
+        const signer = await InMemorySigner.fromSecretKey(privateKey);
+        const vc = JSON.parse(await getStdin());
+        const op = await unsuspend(signer, [vc]);
+
+        debugOperation(op);
+
+        console.debug(`Credential id: ${vc.id}`);
+        console.debug(
+          `Status Manager id: ${vc.credentialStatus.statusListCredential}`
+        );
+        console.debug(`Index: ${vc.credentialStatus.statusListIndex}`);
       } catch (err) {
         console.error(err);
       }
